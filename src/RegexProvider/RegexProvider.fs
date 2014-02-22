@@ -50,10 +50,20 @@ let internal typedRegex() =
                         parameters = [ProvidedParameter("input", typeof<string>)],
                         returnType = matchType,
                         InvokeCode = (fun args -> <@@ (%%args.[0]:Regex).Match(%%args.[1]) @@>))
-                matchMethod.AddXmlDoc "Searches the specified input string for the first occurence of this regular expression"
+                matchMethod.AddXmlDoc "Searches the specified input string for the first occurrence of this regular expression"
 
                 regexType.AddMember matchMethod
-                
+
+                let matchesMethod =
+                    ProvidedMethod(
+                        methodName = "Matches",
+                        parameters = [ProvidedParameter("input", typeof<string>)],
+                        returnType = seqType matchType,
+                        InvokeCode = (fun args -> <@@ (%%args.[0]:Regex).Matches(%%args.[1]) |> Seq.cast<Match> @@>))
+                matchesMethod.AddXmlDoc "Searches the specified input string for all occurrences of this regular expression"
+
+                regexType.AddMember matchesMethod
+
                 let ctor = 
                     ProvidedConstructor(
                         parameters = [], 
