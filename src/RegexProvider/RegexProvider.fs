@@ -43,6 +43,17 @@ let internal typedRegex() =
 
                 regexType.AddMember matchType
 
+                let liftMethod =
+                    ProvidedMethod(
+                        methodName = "Lift",
+                        parameters = [ProvidedParameter("match", typeof<Match>)],
+                        returnType = matchType,
+                        InvokeCode = (fun args -> <@@ (%%args.[0]:Match) @@>),
+                        IsStaticMethod = true)
+                liftMethod.AddXmlDoc "Lifts a match to the provided match type"
+
+                regexType.AddMember liftMethod
+
                 let isMatchMethod =
                     ProvidedMethod(
                         methodName = "IsMatch",
