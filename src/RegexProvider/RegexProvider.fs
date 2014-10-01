@@ -36,12 +36,22 @@ let internal typedRegex() =
 
                 matchType.AddMember matchMethod
                 
-
                 let regexType = erasedType<Regex> thisAssembly rootNamespace typeName
                 regexType.HideObjectMethods <- true
                 regexType.AddXmlDoc "A strongly typed interface to the regular expression '%s'"
 
                 regexType.AddMember matchType
+
+                let liftMethod =
+                    ProvidedMethod(
+                        methodName = "Lift",
+                        parameters = [ProvidedParameter("match", typeof<Match>)],
+                        returnType = matchType,
+                        InvokeCode = (fun args -> <@@ (%%args.[0]:Match) @@>),
+                        IsStaticMethod = true)
+                liftMethod.AddXmlDoc "Lifts a match to the provided match type"
+
+                regexType.AddMember liftMethod
 
                 let isMatchMethod =
                     ProvidedMethod(

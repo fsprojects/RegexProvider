@@ -26,6 +26,20 @@ let ``Can return PhoneNumber property in simple phone number``() =
     PhoneRegex().Match("425-123-2345").PhoneNumber.Value
     |> should equal "123-2345"
 
+[<Test>]
+let ``Can lift a match to the provided match type``() =
+    let evaluator (m : System.Text.RegularExpressions.Match) = 
+        let m' = PhoneRegex.Lift m
+        
+        let areaCode = if m'.AreaCode.Value = "425" then "111" else m'.AreaCode.Value
+        sprintf "%s-%s" areaCode m'.PhoneNumber.Value
+
+    PhoneRegex().Replace("425-123-2345", evaluator)
+    |> should equal "111-123-2345"
+
+    PhoneRegex().Replace("426-123-2345", evaluator)
+    |> should equal "426-123-2345"
+
 type MultiplePhoneRegex = Regex< @"\b(?<AreaCode>\d{3})-(?<PhoneNumber>\d{3}-\d{4})\b" >
 [<Test>]
 let ``Can return multiple matches``() =
