@@ -3,12 +3,17 @@
   <Import Project="..\..\netfx.props" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard2.0;netcoreapp2.0;net45</TargetFrameworks>
-    <Optimize>true</Optimize>
+    <AssemblyName>FSharp.Text.RegexProvider</AssemblyName>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
     <Tailcalls>true</Tailcalls>
     <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <WarningLevel>3</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\paket-files\fsprojects\FSharp.TypeProviders.SDK\src\ProvidedTypes.fsi">

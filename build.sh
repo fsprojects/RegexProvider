@@ -16,8 +16,8 @@ then
   fi
   
   [ ! -e build.fsx ] && .paket/paket.exe update
-  [ ! -e build.fsx ] && packages/FAKE/tools/FAKE.exe init.fsx
-  packages/FAKE/tools/FAKE.exe $@ --fsiargs -d:MONO build.fsx 
+  [ ! -e build.fsx ] && dotnet packages/fake-cli/tools/netcoreapp2.1/any/fake-cli.dll run init.fsx
+  dotnet packages/fake-cli/tools/netcoreapp2.1/any/fake-cli.dll run build.fsx
 else
   # use mono
   mono .paket/paket.bootstrapper.exe
@@ -33,6 +33,6 @@ else
   fi
 
   [ ! -e build.fsx ] && mono .paket/paket.exe update
-  [ ! -e build.fsx ] && mono packages/FAKE/tools/FAKE.exe init.fsx
-  mono packages/FAKE/tools/FAKE.exe $@ --fsiargs -d:MONO build.fsx 
+  [ ! -e build.fsx ] && dotnet packages/fake-cli/tools/netcoreapp2.1/any/fake-cli.dll run init.fsx
+  dotnet packages/fake-cli/tools/netcoreapp2.1/any/fake-cli.dll run build.fsx
 fi

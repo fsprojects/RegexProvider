@@ -1,4 +1,4 @@
-source https://nuget.org/api/v2
+source https://api.nuget.org/v3/index.json
 
 nuget NETStandard.Library.NETFramework
 
@@ -6,12 +6,15 @@ nuget Nuget.CommandLine
 nuget FsUnit
 nuget Microsoft.NET.Test.Sdk
 nuget NUnit
-nuget NUnit.Runners
-nuget NUnit3TestAdapter
-nuget FAKE
+nuget NUnit.Console
+nuget NUnit3TestAdapter version_in_path: true
+nuget fake-cli
+nuget Fake.Core.Environment
+nuget Fake.Core.Trace
+nuget Fake.IO.FileSystem
 nuget FSharp.Formatting
-nuget FSharp.Core 4.3.4
+nuget FSharp.Core
 
-# This lines are used by Paket to get the latest version of the Type Provider SDK files
+# These lines are used by Paket to get the latest version of the Type Provider SDK files
 github fsprojects/FSharp.TypeProviders.SDK src/ProvidedTypes.fsi
 github fsprojects/FSharp.TypeProviders.SDK src/ProvidedTypes.fs

@@ -13,6 +13,6 @@ if errorlevel 1 (
 
 IF NOT EXIST build.fsx (
   .paket\paket.exe update
-  packages\FAKE\tools\FAKE.exe init.fsx
+  dotnet packages\fake-cli\tools\netcoreapp2.1\any\fake-cli.dll run init.fsx
 )
-packages\FAKE\tools\FAKE.exe build.fsx %*
+dotnet packages\fake-cli\tools\netcoreapp2.1\any\fake-cli.dll run build.fsx %*

@@ -22,13 +22,21 @@ let info =
 // For typical project, no changes are needed below
 // --------------------------------------------------------------------------------------
 
-#I "../../packages/FAKE/tools/"
+#I "../../packages/Fake.Core.Environment/lib/netstandard2.0"
+#I "../../packages/Fake.Core.Context/lib/netstandard2.0"
+#I "../../packages/Fake.Core.FakeVar/lib/netstandard2.0"
+#I "../../packages/Fake.Core.Trace/lib/netstandard2.0"
+#I "../../packages/Fake.IO.FileSystem/lib/netstandard2.0"
 #load "../../packages/FSharp.Formatting/FSharp.Formatting.fsx"
+#r "Fake.Core.Environment.dll"
+#r "Fake.Core.Trace.dll"
+#r "Fake.IO.FileSystem.dll"
 #r "NuGet.Core.dll"
-#r "FakeLib.dll"
-open Fake
 open System.IO
-open Fake.FileHelper
+open Fake
+open Fake.Core
+open Fake.IO
+open Fake.IO.FileSystemOperators
 open FSharp.Literate
 open FSharp.MetadataFormat
 
@@ -53,7 +61,7 @@ let docTemplate = formatting @@ "templates/docpage.cshtml"
 let layoutRootsAll = new System.Collections.Generic.Dictionary<string, string list>()
 layoutRootsAll.Add("en",[ templates; formatting @@ "templates"
                           formatting @@ "templates/reference" ])
-subDirectories (directoryInfo templates)
+DirectoryInfo.getSubDirectories (DirectoryInfo templates)
 |> Seq.iter (fun d ->
                 let name = d.Name
                 if name.Length = 2 || name.Length = 3 then
@@ -64,13 +72,13 @@ subDirectories (directoryInfo templates)
 
 // Copy static files and CSS + JS from F# Formatting
 let copyFiles () =
-  CopyRecursive files output true |> Log "Copying file: "
-  ensureDirectory (output @@ "content")
-  CopyRecursive (formatting @@ "styles") (output @@ "content") true 
-    |> Log "Copying styles and scripts: "
+  Shell.copyRecursive files output true |> Seq.iter (Trace.logfn "Copying file: %s")
+  Directory.create (output @@ "content")
+  Shell.copyRecursive (formatting @@ "styles") (output @@ "content") true 
+    |> Seq.iter (Trace.logfn "Copying styles and scripts: %s")
 
 let references =
-  if isMono then
+  if Environment.isMono then
     // Workaround compiler errors in Razor-ViewEngine
     let d = RazorEngine.Compilation.ReferenceResolver.UseCurrentAssembliesReferenceResolver()
     let loadedList = d.GetReferences () |> Seq.map (fun r -> r.GetFile()) |> Seq.cache
@@ -88,7 +96,7 @@ let references =
 
 // Build API reference from XML comments
 let buildReference () =
-  CleanDir (output @@ "reference")
+  Shell.cleanDir (output @@ "reference")
   let binaries =
     referenceBinaries
     |> List.map (fun lib-> bin @@ lib)
