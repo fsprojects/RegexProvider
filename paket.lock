@@ -26,7 +26,7 @@ NUGET
       System.Diagnostics.FileVersionInfo (>= 4.3) - restriction: || (>= net46) (>= netstandard1.6)
       System.IO.FileSystem.Watcher (>= 4.3) - restriction: || (>= net46) (>= netstandard1.6)
     FSharp.Compiler.Service (2.0.0.6)
-    FSharp.Core (4.6.2)
+    FSharp.Core (4.3.4)
       System.Collections (>= 4.0.11) - restriction: && (< net45) (>= netstandard1.6) (< netstandard2.0)
       System.Console (>= 4.0) - restriction: && (< net45) (>= netstandard1.6) (< netstandard2.0)
       System.Diagnostics.Debug (>= 4.0.11) - restriction: && (< net45) (>= netstandard1.6) (< netstandard2.0)

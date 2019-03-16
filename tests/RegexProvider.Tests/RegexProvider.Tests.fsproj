@@ -17,7 +17,7 @@
       <HintPath>..\..\src\RegexProvider\bin\Release\netstandard2.0\FSharp.Text.RegexProvider.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Text.RegexProvider" Condition ="'$(TargetFramework)'=='net461'">
-      <HintPath>..\..\src\RegexProvider\bin\Release\net45\FSharp.Text.RegexProvider.dll</HintPath>
+      <HintPath>..\..\src\RegexProvider\bin\Release\net461\FSharp.Text.RegexProvider.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
