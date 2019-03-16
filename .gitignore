@@ -183,3 +183,6 @@ docs/content/release-notes.md
 
 # Paket
 paket-files
+
+# Visual Studio
+.vs
