@@ -117,7 +117,7 @@ Target.create "RunTests" (fun _ ->
                     Configuration = DotNet.BuildConfiguration.Release 
             }
         )
-        "tests/RegexProvider.tests/RegexProvider.tests.fsproj"
+        "tests/RegexProvider.Tests/RegexProvider.Tests.fsproj"
 )
 
 Target.createFinal "CloseTestRunner" (fun _ ->  
