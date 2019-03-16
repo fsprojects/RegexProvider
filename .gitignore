@@ -177,3 +177,9 @@ nuget/*.nupkg
 .paket/paket.exe
 docs/content/license.md
 docs/content/release-notes.md
+
+# Fake
+.fake
+
+# Paket
+paket-files
