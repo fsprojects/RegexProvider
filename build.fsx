@@ -12,6 +12,7 @@
     nuget Fake.Tools.Git
     nuget Fake.IO.FileSystem
     nuget Fake.DotNet.AssemblyInfoFile
+    nuget Fake.DotNet.Cli
     nuget Fake.DotNet.MSBuild
     nuget Fake.DotNet.Testing.NUnit
     nuget Fake.DotNet.NuGet
@@ -40,7 +41,6 @@ open Fake.IO.FileSystemOperators
 open Fake.IO.Globbing.Operators
 open Fake.Tools
 open Fake.DotNet
-open Fake.DotNet.Testing
 open Fake.DotNet.NuGet
 
 let projects = [|"RegexProvider"|]
@@ -53,7 +53,6 @@ let tags = "F# fsharp typeproviders regex"
 
 let solutionFile  = "RegexProvider"
 
-let testAssemblies = "tests/**/bin/Release/net4*/*.Tests*.dll"
 let gitHome = "https://github.com/fsprojects"
 let gitName = "FSharp.Text.RegexProvider"
 let cloneUrl = "git@github.com:fsprojects/FSharp.Text.RegexProvider.git"
@@ -108,12 +107,17 @@ Target.create "Build" ignore
 Target.create "RunTests" (fun _ ->
     Target.activateFinal "CloseTestRunner"
 
-    !! testAssemblies
-    |> NUnit3.run (fun p ->
-        { p with
-            ShadowCopy = false
-            TimeOut = TimeSpan.FromMinutes 20.
-            OutputDir = "TestResults.xml" })
+    DotNet.test
+        (
+            fun p ->
+            {
+                p with
+                    NoBuild       = true
+                    NoRestore     = true
+                    Configuration = DotNet.BuildConfiguration.Release 
+            }
+        )
+        "tests/RegexProvider.tests/RegexProvider.tests.fsproj"
 )
 
 Target.createFinal "CloseTestRunner" (fun _ ->  
@@ -131,12 +135,12 @@ Target.create "NuGet" (fun _ ->
     let project = projects.[0]
 
     let nugetDocsDir = nugetDir @@ "docs"
-    let nugetlibDir = nugetDir @@ "lib/net40"
+    let nugetlibDir = nugetDir @@ "lib"
 
     Shell.cleanDir nugetDocsDir
     Shell.cleanDir nugetlibDir
         
-    Shell.copyDir nugetlibDir "bin" (fun file -> file.Contains "FSharp.Core." |> not)
+    Shell.copyDir nugetlibDir @"src/RegexProvider/bin/Release" (fun file -> file.Contains "FSharp.Core." |> not)
     Shell.copyDir nugetDocsDir "./docs/output" FileFilter.allFiles
     
     NuGet.NuGet (fun p -> 
