@@ -7,7 +7,7 @@ nuget FsUnit
 nuget Microsoft.NET.Test.Sdk
 nuget NUnit
 nuget NUnit.Console
-nuget NUnit3TestAdapter version_in_path: true
+nuget NUnit3TestAdapter
 nuget fake-cli
 nuget Fake.Core.Environment
 nuget Fake.Core.Trace
