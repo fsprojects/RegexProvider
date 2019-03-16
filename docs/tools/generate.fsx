@@ -31,7 +31,6 @@ let info =
 #r "Fake.Core.Environment.dll"
 #r "Fake.Core.Trace.dll"
 #r "Fake.IO.FileSystem.dll"
-#r "NuGet.Core.dll"
 open System.IO
 open Fake
 open Fake.Core
