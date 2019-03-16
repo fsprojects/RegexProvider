@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\netfx.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
     <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
@@ -12,7 +13,7 @@
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Text.RegexProvider" Condition ="'$(TargetFramework)'=='netstandard2.0'">
+    <Reference Include="FSharp.Text.RegexProvider" Condition ="'$(TargetFramework)'=='netcoreapp2.0'">
       <HintPath>..\..\src\RegexProvider\bin\Release\netstandard2.0\FSharp.Text.RegexProvider.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Text.RegexProvider" Condition ="'$(TargetFramework)'=='net461'">
