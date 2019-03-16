@@ -77,7 +77,13 @@ Target.create "AssemblyInfo" (fun _ ->
 // Clean build results 
 
 Target.create "Clean" (fun _ ->
-    Shell.cleanDirs ["bin"; "temp"; nugetDir]
+    Shell.cleanDirs
+        [
+            "src/RegexProvider/bin"
+            "tests/RegexProvider.Tests/bin"
+            "temp"
+            nugetDir
+        ]
 )
 
 Target.create "CleanDocs" (fun _ ->
