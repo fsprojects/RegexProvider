@@ -188,3 +188,5 @@ paket-files/
 **/[Oo]bj/
 **/[Bb]in/
 .tools/
+.paket/paket
+.paket/paket.bootstrapper

@@ -12,8 +12,8 @@ module Path =
     let output = root </> "output"
     let files = root </> "files"
 
-    let dir p = IO.Path.GetDirectoryName(p)
-    let filename p = IO.Path.GetFileName(p)
+    let dir p = IO.Path.GetDirectoryName(p: string)
+    let filename p = IO.Path.GetFileName(p: string)
     let changeExt ext p = IO.Path.ChangeExtension(p, ext)
 
 module Directory =
