@@ -1,6 +1,3 @@
-open System.Configuration
-open Fake.Core
-open Fake.Core
 // --------------------------------------------------------------------------------------
 // FAKE build script 
 // --------------------------------------------------------------------------------------
@@ -170,7 +167,9 @@ Target.create "NuGet" (fun _ ->
 
 let generateHelp' fail debug =
     let ret, errors = Fake.DotNet.Fsi.exec (fun p -> 
-        { p with WorkingDirectory = "." } ) "docs/tools/generate.fsx" []
+        let fsiPath = __SOURCE_DIRECTORY__ + "/packages/docs/FSharp.Compiler.Tools/tools/fsi.exe"
+        { p with WorkingDirectory = "." 
+                 ToolPath = Fsi.FsiTool.External fsiPath} ) "docs/tools/generate.fsx" []
     if ret = 0 then
         Trace.traceImportant "Help generated"
     else
