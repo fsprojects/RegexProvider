@@ -746,7 +746,6 @@ NUGET
 
 GROUP docs
 GENERATE-LOAD-SCRIPTS: ON
-STORAGE: NONE
 RESTRICTION: == netstandard2.0
 NUGET
   remote: https://api.nuget.org/v3/index.json

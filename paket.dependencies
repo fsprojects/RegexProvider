@@ -11,9 +11,9 @@ nuget NUnit3TestAdapter
 
 
 group docs
-storage: none
 frameworks: netstandard2.0
 generate_load_scripts: true
 source https://api.nuget.org/v3/index.json
-nuget FSharp.Literate
+nuget FSharp.Core 
+nuget FSharp.Literate 
 nuget Fable.React

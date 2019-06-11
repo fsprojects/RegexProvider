@@ -1,5 +1,11 @@
-#load "../../.paket/load/netstandard2.0/docs/docs.group.fsx"
+//#load "../../.paket/load/netstandard2.0/docs/docs.group.fsx"
+#load "../../.paket/load/netstandard2.0/docs/FSharp.Compiler.Service.fsx"
+#load "../../.paket/load/netstandard2.0/docs/FSharp.Literate.fsx"
+#load "../../.paket/load/netstandard2.0/docs/Fable.React.fsx"
+#if !FAKE
 #r "netstandard"
+#endif
+
 open System
 open Fable.React
 open Fable.React.Props
@@ -23,8 +29,8 @@ module Directory =
 
     let copyRecursive (path: string) dest =
         let path =
-            if not (path.EndsWith(@"\")) then
-                path + @"\"
+            if not (path.EndsWith(string IO.Path.DirectorySeparatorChar)) then
+                path + string IO.Path.DirectorySeparatorChar
             else
                 path
         let trim (p: string) =
@@ -143,21 +149,28 @@ let write path html =
 
 let parseFsx source =
     let doc = 
-      let fsharpCoreDir = "-I:" + __SOURCE_DIRECTORY__ + @"\..\lib"
+      let fsharpCoreDir = "-I:" + __SOURCE_DIRECTORY__ + @"/../../packages/docs/FSharp.Core/lib/netstandard1.6/"
+      let fsharpLiterateDir = "-I:" + __SOURCE_DIRECTORY__ + @"/../../packages/docs/FSharp.Literate/lib/netstandard2.0/"
+      let fcsDir = "-I:" + __SOURCE_DIRECTORY__ + @"/../../packages/docs/FSharp.Compiler.Service/lib/netstandard2.0/"
+      let fcs = "-r:" + __SOURCE_DIRECTORY__ + @"/../../packages/docs/FSharp.Compiler.Service/lib/netstandard2.0/FSharp.Compiler.Service.dll"
       let systemRuntime = "-r:System.Runtime"
+      
       Literate.ParseScriptString(
                   source, 
-                  compilerOptions = systemRuntime + " " + fsharpCoreDir,
+                  compilerOptions = String.concat " " [ systemRuntime; fsharpCoreDir; fsharpLiterateDir; fcsDir; fcs ] ,
                   fsiEvaluator = FSharp.Literate.FsiEvaluator([|fsharpCoreDir|]))
     FSharp.Literate.Literate.FormatLiterateNodes(doc, OutputKind.Html, "", true, true)
 
 let parseMd source =
     let doc = 
-      let fsharpCoreDir = "-I:" + __SOURCE_DIRECTORY__ + @"\..\lib"
+      let fsharpCoreDir = "-I:" + __SOURCE_DIRECTORY__ + @"/../../packages/docs/FSharp.Core/lib/netstandard1.6/"
+      let fsharpLiterateDir = "-I:" + __SOURCE_DIRECTORY__ + @"/../../packages/docs/FSharp.Literate/lib/netstandard2.0/"
+      let fcsDir = "-I:" + __SOURCE_DIRECTORY__ + @"/../../packages/docs/FSharp.Compiler.Service/lib/netstandard2.0/"
+      let fcs = "-r:" + __SOURCE_DIRECTORY__ + @"/../../packages/docs/FSharp.Compiler.Service/lib/netstandard2.0/FSharp.Compiler.Service.dll"
       let systemRuntime = "-r:System.Runtime"
       Literate.ParseMarkdownString(
                   source, 
-                  compilerOptions = systemRuntime + " " + fsharpCoreDir,
+                  compilerOptions = String.concat " " [systemRuntime; fsharpCoreDir; fsharpLiterateDir; fcsDir; fcs],
                   fsiEvaluator = FSharp.Literate.FsiEvaluator([|fsharpCoreDir|]))
     FSharp.Literate.Literate.FormatLiterateNodes(doc, OutputKind.Html, "", true, true)
 
