@@ -1,131 +1,191 @@
-// --------------------------------------------------------------------------------------
-// Builds the documentation from `.fsx` and `.md` files in the 'docs/content' directory
-// (the generated documentation is stored in the 'docs/output' directory)
-// --------------------------------------------------------------------------------------
-
-// Binaries that have XML documentation (in a corresponding generated XML file)
-let referenceBinaries = [ "FSharp.Text.RegexProvider.dll" ]
-// Web site location for the generated documentation
-let website = "/FSharp.Text.RegexProvider"
-
-let githubLink = "http://github.com/fsprojects/FSharp.Text.RegexProvider"
-
-// Specify more information about your project
-let info =
-  [ "project-name", "FSharp.Text.RegexProvider"
-    "project-author", "Steffen Forkmann"
-    "project-summary", "A type provider for regular expressions."
-    "project-github", "http://github.com/fsprojects/FSharp.Text.RegexProvider"
-    "project-nuget", "https://www.nuget.org/packages/FSharp.Text.RegexProvider" ]
-
-// --------------------------------------------------------------------------------------
-// For typical project, no changes are needed below
-// --------------------------------------------------------------------------------------
-
-#I "../../packages/FAKE/tools/"
-#load "../../packages/FSharp.Formatting/FSharp.Formatting.fsx"
-#r "NuGet.Core.dll"
-#r "FakeLib.dll"
-open Fake
-open System.IO
-open Fake.FileHelper
+#load "../../.paket/load/netstandard2.0/docs/docs.group.fsx"
+#r "netstandard"
+open System
+open Fable.React
+open Fable.React.Props
 open FSharp.Literate
-open FSharp.MetadataFormat
 
-// When called from 'build.fsx', use the public project URL as <root>
-// otherwise, use the current 'output' directory.
-#if RELEASE
-let root = website
-#else
-let root = "file://" + (__SOURCE_DIRECTORY__ @@ "../output")
-#endif
+let (</>) x y = IO.Path.Combine(x,y)
+module Path =
+    let root = __SOURCE_DIRECTORY__ </> ".."
+    let content = root </> "content"
+    let output = root </> "output"
+    let files = root </> "files"
 
-// Paths with template/source/output locations
-let bin        = __SOURCE_DIRECTORY__ @@ "../../bin"
-let content    = __SOURCE_DIRECTORY__ @@ "../content"
-let output     = __SOURCE_DIRECTORY__ @@ "../output"
-let files      = __SOURCE_DIRECTORY__ @@ "../files"
-let templates  = __SOURCE_DIRECTORY__ @@ "templates"
-let formatting = __SOURCE_DIRECTORY__ @@ "../../packages/FSharp.Formatting/"
-let docTemplate = formatting @@ "templates/docpage.cshtml"
+    let dir p = IO.Path.GetDirectoryName(p)
+    let filename p = IO.Path.GetFileName(p)
+    let changeExt ext p = IO.Path.ChangeExtension(p, ext)
 
-// Where to look for *.csproj templates (in this order)
-let layoutRootsAll = new System.Collections.Generic.Dictionary<string, string list>()
-layoutRootsAll.Add("en",[ templates; formatting @@ "templates"
-                          formatting @@ "templates/reference" ])
-subDirectories (directoryInfo templates)
-|> Seq.iter (fun d ->
-                let name = d.Name
-                if name.Length = 2 || name.Length = 3 then
-                    layoutRootsAll.Add(
-                            name, [templates @@ name
-                                   formatting @@ "templates"
-                                   formatting @@ "templates/reference" ]))
+module Directory =
+    let ensure dir =
+        if not (IO.Directory.Exists dir) then
+            IO.Directory.CreateDirectory dir |> ignore
 
-// Copy static files and CSS + JS from F# Formatting
-let copyFiles () =
-  CopyRecursive files output true |> Log "Copying file: "
-  ensureDirectory (output @@ "content")
-  CopyRecursive (formatting @@ "styles") (output @@ "content") true 
-    |> Log "Copying styles and scripts: "
+    let copyRecursive (path: string) dest =
+        let path =
+            if not (path.EndsWith(@"\")) then
+                path + @"\"
+            else
+                path
+        let trim (p: string) =
+            if p.StartsWith(path) then
+                p.Substring(path.Length)
+            else
+                failwithf "Cannot find path root"
+        IO.Directory.EnumerateFiles(path, "*", IO.SearchOption.AllDirectories)
+        |> Seq.iter (fun p ->
+            let target = dest </> trim p
+            ensure(Path.dir target)
+            IO.File.Copy(p, target, true))
 
-let references =
-  if isMono then
-    // Workaround compiler errors in Razor-ViewEngine
-    let d = RazorEngine.Compilation.ReferenceResolver.UseCurrentAssembliesReferenceResolver()
-    let loadedList = d.GetReferences () |> Seq.map (fun r -> r.GetFile()) |> Seq.cache
-    // We replace the list and add required items manually as mcs doesn't like duplicates...
-    let getItem name = loadedList |> Seq.find (fun l -> l.Contains name)
-    [ (getItem "FSharp.Core").Replace("4.3.0.0", "4.3.1.0")
-      Path.GetFullPath "./../../packages/FSharp.Compiler.Service/lib/net40/FSharp.Compiler.Service.dll"
-      Path.GetFullPath "./../../packages/FSharp.Formatting/lib/net40/System.Web.Razor.dll"
-      Path.GetFullPath "./../../packages/FSharp.Formatting/lib/net40/RazorEngine.dll"
-      Path.GetFullPath "./../../packages/FSharp.Formatting/lib/net40/FSharp.Literate.dll"
-      Path.GetFullPath "./../../packages/FSharp.Formatting/lib/net40/FSharp.CodeFormat.dll"
-      Path.GetFullPath "./../../packages/FSharp.Formatting/lib/net40/FSharp.MetadataFormat.dll" ]
-    |> Some
-  else None
 
-// Build API reference from XML comments
-let buildReference () =
-  CleanDir (output @@ "reference")
-  let binaries =
-    referenceBinaries
-    |> List.map (fun lib-> bin @@ lib)
-  MetadataFormat.Generate
-    ( binaries, output @@ "reference", layoutRootsAll.["en"],
-      parameters = ("root", root)::info,
-      sourceRepo = githubLink @@ "tree/master",
-      sourceFolder = __SOURCE_DIRECTORY__ @@ ".." @@ "..",
-      publicOnly = true, libDirs = [bin],
-      ?assemblyReferences = references )
+    
 
-// Build documentation from `fsx` and `md` files in `docs/content`
-let buildDocumentation () =
-  let fsiEval = FsiEvaluator ()
-  let subdirs = Directory.EnumerateDirectories(content, "*", SearchOption.AllDirectories)
-  for dir in Seq.append [content] subdirs do
-    let sub = if dir.Length > content.Length then dir.Substring(content.Length + 1) else "."
-    let langSpecificPath(lang, path:string) =
-        path.Split([|'/'; '\\'|], System.StringSplitOptions.RemoveEmptyEntries)
-        |> Array.exists(fun i -> i = lang)
-    let layoutRoots =
-        let key = layoutRootsAll.Keys |> Seq.tryFind (fun i -> langSpecificPath(i, dir))
-        match key with
-        | Some lang -> layoutRootsAll.[lang]
-        | None -> layoutRootsAll.["en"] // "en" is the default language
-    Literate.ProcessDirectory
-      ( dir, docTemplate, output @@ sub, replacements = ("root", root)::info,
-        layoutRoots = layoutRoots,
-        ?assemblyReferences = references,
-        generateAnchors = true,
-        fsiEvaluator = fsiEval)
+type Template = 
+    { Name: string
+      Description: string
+      Body: string
+      Author: string
+      GitHub: string
+      NuGet: string
+      Root: string }
 
-// Generate
-copyFiles()
-#if HELP
-buildDocumentation()
-#endif
-#if REFERENCE
-buildReference()
-#endif
+let properties =
+    { Name = "FSharp.Text.RegexProvider"
+      Description = "A type provider for regular expressions."
+      Author = "Steffen Forkmann"
+      GitHub = "http://github.com/fsprojects/FSharp.Text.RegexProvider"
+      NuGet = "https://www.nuget.org/packages/FSharp.Text.RegexProvider" 
+      Body = ""
+      Root = "."}
+
+let href t link =
+    Href (t.Root + link)
+let src t link =
+    Src (t.Root + link)
+
+let template t =
+    fragment [] [
+        RawText "<!DOCTYPE html>"
+        RawText "\n"
+        html [ Lang "en" ]
+            [ head [ ]
+                [ meta [ CharSet "utf-8" ]
+                  title [ ] [ str t.Name ]
+                  meta [ Name "viewport"
+                         HTMLAttr.Content "width=device-width, initial-scale=1.0" ]
+                  meta [ Name "description"
+                         HTMLAttr.Content t.Description ]
+                  meta [ Name "author"
+                         HTMLAttr.Content t.Author ]
+                  script [ Src "http://code.jquery.com/jquery-1.8.0.js" ] [ ]
+                  script [ Src "http://code.jquery.com/ui/1.8.23/jquery-ui.js" ] [ ]
+                  script [ Src "http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js" ] [ ]
+                  link [ Href "http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css"
+                         Rel "stylesheet" ]
+                  link [ Type "text/css"
+                         Rel "stylesheet"
+                         href t "/content/style.css" ]
+                  script [ Type "text/javascript"
+                           src t "/content/tips.js" ]
+                    [ ] ]
+              body [ ]
+                [ div [ Class "container" ]
+                    [ div [ Class "masthead" ]
+                        [ ul [ Class "nav nav-pills pull-right" ]
+                            [ li [ ]
+                                [ a [ Href "http://fsharp.org" ]
+                                    [ str "fsharp.org" ] ]
+                              li [ ]
+                                [ a [ Href t.GitHub ]
+                                    [ str "github page" ] ] ]
+                          h3 [ Class "muted" ]
+                            [ a [ href t "/index.html" ]
+                                [ str t.Name ] ] ]
+                      hr [ ]
+                      div [ Class "row" ]
+                        [ div [ Class "span9"
+                                Id "main" ]
+                            [ RawText t.Body ]
+                          div [ Class "span3" ]
+                            [ ul [ Class "nav nav-list"
+                                   Id "menu" ]
+                                [ li [ Class "nav-header" ]
+                                    [ str t.Name ]
+                                  li [ ]
+                                    [ a [ href t "/index.html" ]
+                                        [ str "Home page" ] ]
+                                  li [ Class "divider" ]
+                                    [ ]
+                                  li [ ]
+                                    [ a [ Href t.NuGet ]
+                                        [ str "Get Library via NuGet" ] ]
+                                  li [ ]
+                                    [ a [ Href t.GitHub ]
+                                        [ str "Source Code on GitHub" ] ]
+                                  li [ ]
+                                    [ a [ href t "/license.html" ]
+                                        [ str "License" ] ]
+                                  li [ ]
+                                    [ a [ href t "/release-notes.html" ]
+                                        [ str "Release Notes" ] ] ] ] ] ]
+                  a [ Href t.GitHub ]
+                    [ img [ Style [ Position PositionOptions.Absolute
+                                    Top "0"
+                                    Right "0"
+                                    Border "0" ]
+                            Src "https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"
+                            Alt "Fork me on GitHub" ] ] ] ] ]
+
+let write path html =
+    use writer = System.IO.File.CreateText(path)
+    Fable.ReactServer.Raw.writeTo  writer (Fable.ReactServer.castHTMLNode html)
+
+let parseFsx source =
+    let doc = 
+      let fsharpCoreDir = "-I:" + __SOURCE_DIRECTORY__ + @"\..\lib"
+      let systemRuntime = "-r:System.Runtime"
+      Literate.ParseScriptString(
+                  source, 
+                  compilerOptions = systemRuntime + " " + fsharpCoreDir,
+                  fsiEvaluator = FSharp.Literate.FsiEvaluator([|fsharpCoreDir|]))
+    FSharp.Literate.Literate.FormatLiterateNodes(doc, OutputKind.Html, "", true, true)
+
+let parseMd source =
+    let doc = 
+      let fsharpCoreDir = "-I:" + __SOURCE_DIRECTORY__ + @"\..\lib"
+      let systemRuntime = "-r:System.Runtime"
+      Literate.ParseMarkdownString(
+                  source, 
+                  compilerOptions = systemRuntime + " " + fsharpCoreDir,
+                  fsiEvaluator = FSharp.Literate.FsiEvaluator([|fsharpCoreDir|]))
+    FSharp.Literate.Literate.FormatLiterateNodes(doc, OutputKind.Html, "", true, true)
+
+let format (doc: LiterateDocument) =
+    Formatting.format doc.MarkdownDocument true OutputKind.Html
+
+let processFile outdir path  =
+    let outfile = 
+        let name = path |> Path.filename |> Path.changeExt ".html"
+        outdir </> name
+
+    let parse = 
+        match IO.Path.GetExtension(path) with
+        | ".fsx" -> parseFsx
+        | ".md" -> parseMd
+        | ext -> failwithf "Unable to process doc for %s files" ext
+    let t =
+        { properties with
+            Body =
+                IO.File.ReadAllText(path)
+                |> parse
+                |> format }
+    t 
+    |> template
+    |> write outfile
+
+
+Directory.copyRecursive Path.files Path.output
+
+IO.Directory.EnumerateFiles Path.content
+|> Seq.iter (processFile Path.output)

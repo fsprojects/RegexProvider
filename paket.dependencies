@@ -1,9 +1,19 @@
-source https://nuget.org/api/v2
+storage: none
+source https://api.nuget.org/v3/index.json
 
-nuget Nuget.CommandLine
+nuget Microsoft.NET.Test.Sdk
 nuget FsUnit
 nuget NUnit
 nuget NUnit.Runners
-nuget FAKE
-nuget FSharp.Formatting
 nuget FSharp.Core
+nuget NUnit3TestAdapter
+
+
+
+group docs
+storage: none
+frameworks: netstandard2.0
+generate_load_scripts: true
+source https://api.nuget.org/v3/index.json
+nuget FSharp.Literate
+nuget Fable.React
