@@ -1,0 +1,5 @@
+type project
+authors
+    Steffen Forkmann, David Tchepak, Sergey Tihon, Daniel Mohl, Tomas Petricek, Ryan Riley, Mauricio Scheffer, Phil Trelford, Vasily Kirichenko, Jeremie Chassaing
+tags
+    F# fsharp typeproviders regex

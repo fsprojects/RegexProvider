@@ -1,4 +1,4 @@
-storage: none
+
 source https://api.nuget.org/v3/index.json
 
 nuget Microsoft.NET.Test.Sdk
@@ -7,8 +7,10 @@ nuget NUnit
 nuget NUnit.Runners
 nuget FSharp.Core
 nuget NUnit3TestAdapter
+nuget NETStandard.Library.NETFramework
 
-
+github fsprojects/FSharp.TypeProviders.SDK src/ProvidedTypes.fsi
+github fsprojects/FSharp.TypeProviders.SDK src/ProvidedTypes.fs
 
 group docs
 frameworks: netstandard2.0

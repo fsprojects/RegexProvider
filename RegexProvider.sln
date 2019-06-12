@@ -1,6 +1,7 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29001.49
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{FC8DDDEE-CF41-4EC2-ADA8-C202E7423FF1}"
 	ProjectSection(SolutionItems) = preProject
@@ -9,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{FC8DDD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RegexProvider", "src\RegexProvider\RegexProvider.fsproj", "{7E90D6CE-A10B-4858-A5BC-41DF7250CBCA}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "RegexProvider", "src\RegexProvider\RegexProvider.fsproj", "{7E90D6CE-A10B-4858-A5BC-41DF7250CBCA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{BF60BC93-E09B-4E5F-9D85-95A519479D54}"
 	ProjectSection(SolutionItems) = preProject
@@ -30,10 +31,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{8E6D
 		docs\content\index.fsx = docs\content\index.fsx
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{71BDD4E1-2849-4AEF-B560-DEE80301F5C5}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RegexProvider.Tests", "tests\RegexProvider.Tests\RegexProvider.Tests.fsproj", "{597D88F2-B340-4A92-B61F-CACEDF9C2042}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,10 +41,6 @@ Global
 		{7E90D6CE-A10B-4858-A5BC-41DF7250CBCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E90D6CE-A10B-4858-A5BC-41DF7250CBCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E90D6CE-A10B-4858-A5BC-41DF7250CBCA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{597D88F2-B340-4A92-B61F-CACEDF9C2042}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{597D88F2-B340-4A92-B61F-CACEDF9C2042}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{597D88F2-B340-4A92-B61F-CACEDF9C2042}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{597D88F2-B340-4A92-B61F-CACEDF9C2042}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +48,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{83F16175-43B1-4C90-A1EE-8E351C33435D} = {A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}
 		{8E6D5255-776D-4B61-85F9-73C37AA1FB9A} = {A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}
-		{597D88F2-B340-4A92-B61F-CACEDF9C2042} = {71BDD4E1-2849-4AEF-B560-DEE80301F5C5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BE740DCC-41BC-497F-9E95-6B4AA184FD54}
 	EndGlobalSection
 EndGlobal

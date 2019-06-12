@@ -1,32 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\netfx.props" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <AssemblyName>FSharp.Text.RegexProvider</AssemblyName>
-    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <Tailcalls>false</Tailcalls>
-    <DocumentationFile>
-    </DocumentationFile>
-    <StartAction>Program</StartAction>
-    <StartProgram>C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\devenv.exe</StartProgram>
-    <StartArguments>D:\code\RegexProvider\RegexProvider.Tests.sln</StartArguments>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Tailcalls>true</Tailcalls>
     <DocumentationFile>..\..\bin\$(TargetFramework)\FSharp.Text.RegexProvider.XML</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\paket-files\fsprojects\FSharp.TypeProviders.SDK\src\ProvidedTypes.fsi">
+      <Paket>True</Paket>
+      <Link>paket-files/ProvidedTypes.fsi</Link>
+    </Compile>
+    <Compile Include="..\..\paket-files\fsprojects\FSharp.TypeProviders.SDK\src\ProvidedTypes.fs">
+      <Paket>True</Paket>
+      <Link>paket-files/ProvidedTypes.fs</Link>
+    </Compile>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="ProvidedTypes.fsi" />
-    <Compile Include="ProvidedTypes.fs" />
     <Compile Include="TypeProviders.Helper.fs" />
     <Compile Include="RegexProvider.fs" />
     <None Include="paket.references" />
@@ -34,8 +29,22 @@
   <ItemGroup>
     <!-- We only force the use of the F# 3.1 FSharp.Core to make sure this library continues to compile with F# 3.1. -->
     <!-- Yes, people are still making type providers that need to load into F# 3.1 tooling (VS2013). -->
-    <PackageReference Include="FSharp.Core" Version="3.1.2.5" Condition="'$(TargetFramework)' == 'net45'" />
-    <PackageReference Include="FSharp.Core" Version="4.2.*" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
+    <!-- <PackageReference Include="FSharp.Core" Version="3.1.2.5" Condition="'$(TargetFramework)' == 'net45'" />
+    <PackageReference Include="FSharp.Core" Version="4.2.*" Condition="'$(TargetFramework)' == 'netstandard2.0'" /> -->
+  </ItemGroup>
+  <ItemGroup>
+    <!-- These files are the facades necessary to run .NET Standard 2.0 components on .NET Framework 4.6.1 (.NET Framework 4.7 will -->
+    <!-- come with these facades included). Because the type provider is a .NET Standard 2.0 component, the deployment of the type -->
+    <!--  provider must include these facade DLLs if it is to run hosted inside an F# compiler executing using  .NET Framework 4.6.1 or Mono 5.0. -->
+    <None Include="..\..\packages\NETStandard.Library.NETFramework\build\net461\lib\netstandard.dll" Condition="'$(TargetFramework)' == 'net461'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\NETStandard.Library.NETFramework\build\net461\lib\System.Reflection.dll" Condition="'$(TargetFramework)' == 'net461'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\NETStandard.Library.NETFramework\build\net461\lib\System.Runtime.dll" Condition="'$(TargetFramework)' == 'net461'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

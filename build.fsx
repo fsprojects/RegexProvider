@@ -1,3 +1,4 @@
+open Fake.SystemHelper
 // --------------------------------------------------------------------------------------
 // FAKE build script 
 // --------------------------------------------------------------------------------------
@@ -16,7 +17,7 @@ nuget Fake.DotNet.AssemblyInfoFile
 nuget Fake.Dotnet.Cli
 nuget Fake.DotNet.Fsi
 nuget Fake.Tools.Git
-nuget Fake.DotNet.NuGet //"
+nuget Fake.DotNet.Paket //"
 
 #load ".fake/build.fsx/intellisense.fsx"
 #if !FAKE
@@ -31,6 +32,7 @@ open Fake.Tools.Git.Repository
 open Fake.IO
 open Fake.DotNet
 open Fake.IO.FileSystemOperators
+open Fake.IO.Globbing.Operators
 open Fake.DotNet.NuGet
 open System
 open System.IO
@@ -40,8 +42,6 @@ let projects = [|"RegexProvider"|]
 let projectName = "FSharp.Text.RegexProvider"
 let summary = "A type provider for regular expressions."
 let description = "A type provider for regular expressions."
-let authors = ["Steffen Forkmann"; "David Tchepak"; "Sergey Tihon"; "Daniel Mohl"; "Tomas Petricek"; "Ryan Riley"; "Mauricio Scheffer"; "Phil Trelford"; "Vasily Kirichenko" ]
-let tags = "F# fsharp typeproviders regex"
 
 let solutionFile  = "RegexProvider"
 
@@ -93,14 +93,14 @@ Target.create "Build" (fun _ ->
         { p with 
             Configuration = DotNet.BuildConfiguration.Release
             Framework = Some "netstandard2.0"
-            OutputPath = Some "bin/netstandard2.0"
+            OutputPath = Some "../../bin/netstandard2.0"
          } )
         "src/RegexProvider/"
     DotNet.publish (fun p -> 
         { p with 
             Configuration = DotNet.BuildConfiguration.Release
-            Framework = Some "net45"
-            OutputPath = Some "bin/net45" } )
+            Framework = Some "net461"
+            OutputPath = Some "../../bin/net461" } )
         "src/RegexProvider/"
 
     DotNet.build (fun p -> 
@@ -125,45 +125,30 @@ Target.create "RunTests" (fun _ ->
 // Build a NuGet package
 
 Target.create "NuGet" (fun _ ->
-    // Format the description to fit on a single line (remove \r\n and double-spaces)
-    let description = description.Replace("\r", "")
-                                 .Replace("\n", "")
-                                 .Replace("  ", " ")
-    let project = projects.[0]
+    let toolPath =
+        if File.Exists ".paket/paket" then
+            ".paket/paket"
+        else
+            ".paket/paket.exe"
 
-    let nugetDocsDir = nugetDir </> "docs"
-    let nugetlibDir = nugetDir </> "lib/"
-    let allFiles = fun _ -> true
-
-    Shell.cleanDir nugetDocsDir
-    Shell.cleanDir nugetlibDir
-        
-    Shell.copyDir nugetlibDir "bin" (fun file -> 
-        not (file.Contains "FSharp.Core.")
-        && not (file.Contains "System.")
-        && IO.Path.GetExtension file <> ".json")
-
-    Shell.copyDir nugetDocsDir "./docs/output" allFiles
-    
-    NuGet.NuGet (fun p -> 
-        { p with   
-            Authors = authors
-            Project = projectName
-            Summary = summary
-            Description = description
-            Version = release.NugetVersion
+    Paket.pack (fun p ->
+        { p with 
+            OutputPath = "bin/nuget"
             ReleaseNotes = release.Notes |> String.toLines
-            Tags = tags
-            OutputPath = nugetDir
-            AccessKey = Environment.environVarOrDefault "nugetkey" ""
-            Publish = Environment.hasEnvironVar "nugetkey"
-            Dependencies = [] })
-        (project + ".nuspec")
+            Version = release.NugetVersion
+            ToolPath = toolPath
+            BuildConfig = "release" })
+
+    if Environment.hasEnvironVar "nugetkey" then
+        !! ("bin/nuget/*.nupkg")
+        |> Paket.pushFiles (fun p ->
+            { p with ApiKey = Environment.environVar "nugetkey" 
+                     ToolPath = toolPath } )
+    
 )
 
 // --------------------------------------------------------------------------------------
 // Generate the documentation
-
 
 let generateHelp' fail debug =
     let ret, errors = Fake.DotNet.Fsi.exec (fun p -> 
