@@ -1,3 +1,6 @@
+#### 2.0.0 - 12.06.2019
+* Update to net461 and netstandard2.0 - https://github.com/fsprojects/FSharp.Text.RegexProvider/issues/18
+
 #### 1.0.0 - 07.07.2016
 * Added a `Typed` prefix to generated methods - https://github.com/fsprojects/FSharp.Text.RegexProvider/issues/16
 
