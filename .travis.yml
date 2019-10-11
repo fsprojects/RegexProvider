@@ -3,6 +3,6 @@ language: csharp
 sudo: true  # use the new container-based Travis infrastructure 
 dist: bionic 
 mono: latest
-dotnet: 2.2.203
+dotnet: 3.0.100
 script: 
   - ./build.sh All

@@ -1,10 +1,19 @@
-//#load "../../.paket/load/netstandard2.0/docs/docs.group.fsx"
-#load "../../.paket/load/netstandard2.0/docs/FSharp.Compiler.Service.fsx"
 #load "../../.paket/load/netstandard2.0/docs/FSharp.Literate.fsx"
 #load "../../.paket/load/netstandard2.0/docs/Fable.React.fsx"
+
 #if !FAKE
 #r "netstandard"
 #endif
+
+// HACK: force usage of Fsharp.Compiler.Services
+// or the indirect reference from FSharp.Literate will fail to load
+let dummy (pos: FSharp.Compiler.Range.pos) =
+    pos.Column
+FSharp.Compiler.Range.mkPos 1 1 |> dummy
+
+// HACK: Force usage of Fable.Core
+// or the indirect reference from Fable.React will fail to load
+typeof<Fable.Core.EraseAttribute>
 
 open System
 open Fable.React
@@ -158,7 +167,7 @@ let reference path =
     "-r:" + docPackagePath path
 let evaluationOptions = 
     [| 
-         includeDir "FSharp.Core/lib/netstandard1.6/"
+         includeDir "FSharp.Core/lib/netstandard2.0/"
          includeDir "FSharp.Literate/lib/netstandard2.0/" 
          includeDir "FSharp.Compiler.Service/lib/netstandard2.0/" 
          reference "FSharp.Compiler.Service/lib/netstandard2.0/FSharp.Compiler.Service.dll" |] 
@@ -166,6 +175,8 @@ let evaluationOptions =
 let compilerOptions = 
     String.concat " " ( 
          "-r:System.Runtime"
+         :: "-r:System.Net.WebClient"
+         :: "-r:System.Runtime.Extensions"
          :: Array.toList evaluationOptions)
 
 let parseFsx path =
@@ -197,6 +208,7 @@ let format (doc: LiterateDocument) =
     Formatting.format doc.MarkdownDocument true OutputKind.Html
 
 let processFile outdir path  =
+    printfn "Processing help: %s" path
     let outfile = 
         let name = path |> Path.filename |> Path.changeExt ".html"
         outdir </> name
