@@ -83,24 +83,19 @@ Target.create "CleanDocs" (fun _ ->
 // Build library & test project
 
 Target.create "Build" (fun _ ->
-    DotNet.build (fun p -> 
-        { p with 
-            Configuration = DotNet.BuildConfiguration.Release
-         } )
-        "src/RegexProvider/"
-
     DotNet.publish (fun p -> 
         { p with 
             Configuration = DotNet.BuildConfiguration.Release
             Framework = Some "netstandard2.0"
-            OutputPath = Some "../../bin/netstandard2.0"
+            OutputPath = Some (__SOURCE_DIRECTORY__ + "/bin/netstandard2.0")
          } )
         "src/RegexProvider/"
     DotNet.publish (fun p -> 
         { p with 
             Configuration = DotNet.BuildConfiguration.Release
             Framework = Some "net461"
-            OutputPath = Some "../../bin/net461" } )
+            OutputPath = Some (__SOURCE_DIRECTORY__ + "/bin/net461" )
+        } )
         "src/RegexProvider/"
 
     DotNet.build (fun p -> 
@@ -151,18 +146,28 @@ Target.create "NuGet" (fun _ ->
 // Generate the documentation
 
 let generateHelp' fail debug =
-    let ret, errors = Fake.DotNet.Fsi.exec (fun p -> 
-        let fsiPath = __SOURCE_DIRECTORY__ + "/packages/docs/FSharp.Compiler.Tools/tools/fsi.exe"
-        { p with WorkingDirectory = "." 
-                 ToolPath = Fsi.FsiTool.External fsiPath} ) "docs/tools/generate.fsx" []
-    if ret = 0 then
+    let result = 
+        DotNet.exec 
+            (fun p -> { p with WorkingDirectory = "." })
+            "fsi" (__SOURCE_DIRECTORY__ + "/docs/tools/generate.fsx" )
+    if result.OK then
         Trace.traceImportant "Help generated"
     else
-        if fail then
-            failwith "generating help documentation failed"
-        else
-            Trace.traceImportant "generating help documentation failed"
-    ()
+        String.concat "\n" result.Errors
+        |> failwithf "generating help documentation failed:\n%s"
+            
+    // let ret, errors = Fake.DotNet.Fsi.exec (fun p -> 
+    //     let fsiPath = __SOURCE_DIRECTORY__ + "/packages/docs/FSharp.Compiler.Tools/tools/fsi.exe"
+    //     { p with WorkingDirectory = "." 
+    //              ToolPath = Fsi.FsiTool.External fsiPath} ) "docs/tools/generate.fsx" []
+    // if ret = 0 then
+    //     Trace.traceImportant "Help generated"
+    // else
+    //     if fail then
+    //         failwith "generating help documentation failed"
+    //     else
+    //         Trace.traceImportant "generating help documentation failed"
+    // ()
 
 let generateHelp fail =
     generateHelp' fail false
@@ -249,7 +254,8 @@ Target.create "All" ignore
 "CleanDocs"
   ==> "GenerateHelpDebug"
 
-"GenerateHelp"
+"Build"
+  ?=> "GenerateHelp"
   ==> "KeepRunning"
     
 "ReleaseDocs"
